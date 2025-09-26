@@ -1,4 +1,3 @@
-
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -7,13 +6,8 @@
   <title>Midweek Schedule Fetcher (ASL)</title>
   <style>
     :root {
-      --bg: #ffffff;
-      --card: #f7f7f8;
-      --ink: #111;
-      --muted: #666;
-      --accent: #4b5563; /* dark gray strip */
-      --shadow: 0 10px 30px rgba(0,0,0,0.06);
-      --radius: 16px;
+      --bg: #ffffff; --card: #f7f7f8; --ink: #111; --muted: #666;
+      --accent: #4b5563; --shadow: 0 10px 30px rgba(0,0,0,0.06); --radius: 16px;
     }
     body { margin: 0; padding: 24px; font: 16px/1.4 system-ui, -apple-system, Segoe UI, Roboto, Helvetica, Arial; background: var(--bg); color: var(--ink); }
     .container { max-width: 1100px; margin: 0 auto; }
@@ -27,12 +21,12 @@
     input[type="url"], input[type="text"] { width: 100%; padding: 10px 12px; border-radius: 12px; border: 1px solid #ddd; }
     .btns { display: flex; flex-wrap: wrap; gap: 8px; margin-top: 6px; }
     button { border: 0; border-radius: 999px; padding: 10px 14px; cursor: pointer; font-weight: 600; box-shadow: var(--shadow); }
-    .primary { background: #4470AD; color: #fff; } /* Load = blue */
+    .primary { background: #4470AD; color: #fff; }  /* Load */
     .ghost { background: #fff; color: var(--ink); border: 1px solid #ddd; }
-    .warn { background: #b7791f; color: #fff; } /* Test */
-    .teal { background: #0f766e; color: #fff; } /* Open */
+    .warn { background: #b7791f; color: #fff; }    /* Test */
+    .teal { background: #0f766e; color: #fff; }    /* Open */
     .emerald { background: #059669; color: #fff; } /* Parse */
-    .status { font-size: 13px; color: #999; min-height: 1.2em; margin-left: 8px; } /* lighter inline status */
+    .status { font-size: 13px; color: #999; min-height: 1.2em; margin-left: 8px; }
     .grid { display: grid; gap: 12px; grid-template-columns: repeat(auto-fill, minmax(260px, 1fr)); margin-top: 8px; }
     .tile { background: #fff; border: 1px solid #e5e7eb; border-radius: 14px; padding: 12px; }
     .tile h3 { font-size: 15px; margin: 0 0 6px; }
@@ -44,12 +38,11 @@
     .sec-min { font-size: 12px; color: var(--muted); margin-left: 6px; }
     .pill { display: inline-flex; align-items: center; gap: 6px; background: #f3f4f6; color: #555; padding: 4px 12px; border-radius: 999px; font-size: 13px; font-weight: 500; }
     .pill svg { width: 14px; height: 14px; }
-
-    /* Week header row with top-right clipboard */
     .week-head { display:flex; align-items:center; justify-content:space-between; gap:8px; position:relative; z-index:2; }
     .iconbtn { display:inline-flex; align-items:center; justify-content:center; width:60px; height:60px; border-radius:999px; background:#fff; border:1px solid #e5e7eb; box-shadow: var(--shadow); cursor:pointer; }
     .iconbtn svg { width:100%; height:100%; stroke:#374151; }
     .iconbtn:active { transform: translateY(1px); }
+    .italic { font-style: italic; }
   </style>
 </head>
 <body>
@@ -60,13 +53,247 @@
         <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor">
           <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"/>
         </svg>
-        Version: 1.0 (2025-9-24)
+        Version: 1.0 (2025-09-24)
       </div>
       <div class="btns"><button class="ghost" id="btnBack" style="display:none">Back</button></div>
     </header>
 
     <div class="row" id="front">
       <div class="card">
+        <div class="strip"></div>
+        <div class="controls">
+          <div>
+            <label>Cloudflare Worker base URL</label>
+            <input type="text" id="workerBase" value="https://lmm-tues.latnem.workers.dev/" />
+            <div class="btns">
+              <button class="warn" id="btnTestWorker">Test</button>
+              <span class="status" id="workerStatus"></span>
+            </div>
+          </div>
+          <div>
+            <label>LMM Workbook URL</label>
+            <input type="url" id="mainUrl" value="https://www.jw.org/ase/library/jw-meeting-workbook/" />
+            <div class="btns">
+              <button class="primary" id="btnLoadMonths">Load</button>
+              <span class="status" id="monthsStatus"></span>
+            </div>
+            <div class="grid" id="monthsGrid"></div>
+          </div>
+        </div>
+      </div>
+
+      <div class="card">
+        <div class="strip"></div>
+        <h3>Output</h3>
+        <div class="grid" id="weeksGrid" style="margin-bottom:8px;"></div>
+        <div class="btns" style="margin-bottom:8px">
+          <button class="ghost" id="btnCopyAll">JSON</button>
+          <button class="ghost" id="btnClear">Clear</button>
+          <span class="status" id="weeksStatus"></span>
+        </div>
+        <pre class="mono" id="out" style="min-height:160px;"></pre>
+      </div>
+    </div>
+
+    <div class="card" id="detail" style="display:none">
+      <div class="strip"></div>
+      <div class="week-head">
+        <h3 id="weekTitle">Week</h3>
+        <button class="iconbtn" id="btnCopyPreview" title="Copy schedule" style="display:none"><svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 4h2a2 2 0 012 2v14a2 2 0 01-2 2H6a2 2 0 01-2-2V6a2 2 0 012-2h2m2-2h4a2 2 0 012 2v0a2 2 0 01-2 2h-4a2 2 0 01-2-2v0a2 2 0 012-2z"/></svg></button>
+      </div>
+      <div id="weekView"></div>
+    </div>
+  </div>
+
+<script>
+const $ = (s)=>document.querySelector(s);
+const monthsGrid=$("#monthsGrid"), weeksGrid=$("#weeksGrid");
+const monthsStatus=$("#monthsStatus"), weeksStatus=$("#weeksStatus"), workerStatus=$("#workerStatus");
+const out=$("#out"), weekView=$("#weekView"), btnBack=$("#btnBack");
+const btnCopyPreview = $("#btnCopyPreview");
+
+let latestSongs=null, lastResult=null;
+
+$("#btnClear").onclick=()=>{ out.textContent=""; weekView.innerHTML=""; weeksStatus.textContent=""; latestSongs=null; lastResult=null; btnCopyPreview.style.display="none"; };
+
+$("#btnCopyAll").onclick=async()=>{
+  if(!lastResult){ weeksStatus.textContent="Nothing to copy."; return; }
+  try{ await navigator.clipboard.writeText(JSON.stringify(lastResult, null, 2)); weeksStatus.textContent="Copied JSON."; }
+  catch{ weeksStatus.textContent="Copy failed."; }
+};
+
+btnCopyPreview.addEventListener('click', async (ev)=>{
+  ev.preventDefault(); ev.stopPropagation();
+  const wtEl = document.querySelector('#weekTitle');
+  const wt = wtEl ? wtEl.textContent : 'Week';
+  const res = lastResult;
+  if(!res){ weeksStatus.textContent='Nothing parsed yet.'; return; }
+  const text = buildScheduleText(wt, res);
+  const ok = await copyText(text);
+  weeksStatus.textContent = ok ? 'Copied schedule.' : 'Copy failed.';
+});
+
+btnBack.onclick=()=>{ $("#detail").style.display="none"; $("#front").style.display=""; btnBack.style.display="none"; };
+
+/* ----------------- Test worker (health) ----------------- */
+$("#btnTestWorker").onclick=async()=>{
+  const worker=$("#workerBase").value.trim();
+  if(!worker){ workerStatus.textContent="Enter Worker URL"; return; }
+  workerStatus.textContent="Pinging…";
+  try{
+    const healthUrl = worker.replace(/\/+$/,"")+"/api/health";
+    const res = await fetch(healthUrl, {method:"GET"});
+    await res.text();
+    workerStatus.textContent = res.ok? "Health OK ("+res.status+")" : "Health failed ("+res.status+")";
+  }catch(e){ console.error(e); workerStatus.textContent = "Ping error"; }
+};
+
+/* ----------------- Load months via Worker ----------------- */
+$("#btnLoadMonths").onclick=async()=>{
+  const worker=$("#workerBase").value.trim(), main=$("#mainUrl").value.trim();
+  if(!worker||!main){ monthsStatus.textContent="Missing input"; return; }
+  monthsStatus.textContent="Loading months…"; monthsGrid.innerHTML=""; weeksGrid.innerHTML=""; weeksStatus.textContent="";
+  try{
+    const endpoint = worker.replace(/\/+$/,"")+"/api/listMonths?u="+encodeURIComponent(main);
+    const resp = await fetch(endpoint);
+    if(!resp.ok){ throw new Error("listMonths "+resp.status); }
+    const data = await resp.json();
+    const items = (data.months||[]);
+    if(!items.length){ monthsStatus.textContent="No months found"; return; }
+    monthsStatus.textContent = items.length+" months found";
+    renderMonths(items);
+  }catch(e){ console.error(e); monthsStatus.textContent="Load failed"; }
+};
+
+function renderMonths(items){
+  monthsGrid.innerHTML="";
+  for(const it of items){
+    const tile=document.createElement("div");
+    tile.className="tile";
+    tile.innerHTML=`<h3>${escapeHtml(it.title)}</h3><div class="btns"><button class="teal">Open</button></div>`;
+    tile.querySelector("button").onclick=()=>loadWeeks(it.url, it.title);
+    monthsGrid.appendChild(tile);
+  }
+}
+
+/* ----------------- Load weeks via Worker ----------------- */
+async function loadWeeks(monthUrl, title){
+  weeksStatus.textContent=`Loading weeks…`; weeksGrid.innerHTML="";
+  try{
+    const worker=$("#workerBase").value.trim();
+    const endpoint = worker.replace(/\/+$/,"")+"/api/listWeeks?u="+encodeURIComponent(monthUrl);
+    const resp = await fetch(endpoint);
+    if(!resp.ok){ throw new Error("listWeeks "+resp.status); }
+    const data = await resp.json();
+    const items = data.weeks || [];
+    if(!items.length){ weeksStatus.textContent="No weeks found"; return; }
+    weeksStatus.textContent = items.length+" weeks found";
+    renderWeeks(items);
+  }catch(e){ console.error(e); weeksStatus.textContent="Load failed"; }
+}
+
+function renderWeeks(items){
+  weeksGrid.innerHTML="";
+  for(const it of items){
+    const tile=document.createElement("div");
+    tile.className="tile";
+    tile.innerHTML=`<h3>${escapeHtml(it.title)}</h3>
+    <div class="btns"><button class="emerald">Parse</button></div>`;
+    tile.querySelector("button").onclick=()=>parseWeek(it.url, it.title);
+    weeksGrid.appendChild(tile);
+  }
+}
+
+/* ----------------- Parse week via Worker ----------------- */
+async function parseWeek(weekUrl, weekLabel){
+  weeksStatus.textContent="Loading week…";
+  out.textContent=""; weekView.innerHTML=""; latestSongs=null; lastResult=null;
+  const wt=document.querySelector('#weekTitle'); if(wt) wt.textContent = weekLabel || 'Week';
+  try{
+    const worker=$("#workerBase").value.trim();
+    const endpoint = worker.replace(/\/+$/,"")+"/api/parseWeek?u="+encodeURIComponent(weekUrl);
+    const resp = await fetch(endpoint);
+    if(!resp.ok){ throw new Error("parseWeek "+resp.status); }
+    const data = await resp.json(); // { ok:true, weekTitle, song, sections }
+    if(!data.ok){ throw new Error("parseWeek body"); }
+    const result = { source: weekUrl, song: data.song, sections: data.sections, weekTitle: data.weekTitle };
+    latestSongs = data.song;
+    lastResult = result;
+    out.textContent = JSON.stringify(result, null, 2);
+    render(result);
+    btnCopyPreview.style.display=""; btnCopyPreview.setAttribute('aria-label','Copy schedule');
+  }catch(e){ console.error(e); weeksStatus.textContent="Parse failed"; }
+}
+
+/* ----------------- Render ----------------- */
+function render(res){
+  const { song: songs, sections } = res;
+  const c = $("#weekView");
+  c.innerHTML = `<div class="grid" style="grid-template-columns: 1fr;">
+    <div class="tile"><h3>SONG</h3>
+      <div class="section"><h4>Opening</h4><div class="muted">${songs?.opening ?? "—"}</div></div>
+      <div class="section"><h4>Middle</h4><div class="muted">${songs?.middle ?? "—"}</div></div>
+      <div class="section"><h4>Closing</h4><div class="muted">${songs?.closing ?? "—"}</div></div>
+    </div>
+    ${(sections||[]).map(sec => `
+      <div class="tile">
+        <h3>${escapeHtml(sec.section)}${sec.minutes!=null?` <span class="sec-min">(${sec.minutes} min.)</span>`:""}</h3>
+        ${(sec.items||[]).map(it => `
+          <div class="section">
+            <h4>${it.num}. ${escapeHtml(it.title || "")}</h4>
+            ${it.sublabel ? `<div class="muted italic">${escapeHtml(it.sublabel)}</div>` : ``}
+            <div class="muted">${it.minutes!=null?`(${it.minutes} min.)`:`(min. not listed)`}</div>
+          </div>
+        `).join("")}
+      </div>
+    `).join("")}
+  </div>`;
+}
+
+/* ----------------- Utils ----------------- */
+async function copyText(text){
+  try{
+    if (navigator.clipboard && window.isSecureContext) {
+      await navigator.clipboard.writeText(text);
+      return true;
+    }
+  }catch(e){}
+  try{
+    const ta = document.createElement('textarea');
+    ta.value = text; ta.style.position = 'fixed'; ta.style.left = '-9999px'; ta.style.top = '0';
+    document.body.appendChild(ta); ta.focus(); ta.select();
+    const ok = document.execCommand('copy'); document.body.removeChild(ta); return ok;
+  }catch(e){ return false; }
+}
+
+function buildScheduleText(weekTitle, res){
+  const lines = [];
+  lines.push(weekTitle || res.weekTitle || "Week", "");
+  if(res.song){
+    lines.push("SONG");
+    lines.push(`Opening: ${res.song.opening ?? "—"}`);
+    lines.push(`Middle: ${res.song.middle ?? "—"}`);
+    lines.push(`Closing: ${res.song.closing ?? "—"}`, "");
+  }
+  for(const sec of res.sections||[]){
+    const head = sec.minutes!=null ? `${sec.section} (${sec.minutes} min.)` : sec.section;
+    lines.push(head);
+    for(const it of sec.items||[]){
+      const sbl = it.sublabel ? ` — ${it.sublabel}` : "";
+      const mins = it.minutes!=null ? ` (${it.minutes} min.)` : " (min. not listed)";
+      lines.push(`${it.num}. ${it.title}${sbl}${mins}`);
+    }
+    lines.push("");
+  }
+  return lines.join("\n").replace(/\n{3,}/g,"\n\n").trim();
+}
+
+function escapeHtml(s){
+  return String(s ?? "").replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+}
+</script>
+</body>
+</html>
         <div class="strip"></div>
         <div class="controls">
           <div>
