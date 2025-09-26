@@ -5,56 +5,42 @@
   <meta name="viewport" content="width=device-width, initial-scale=1" />
   <title>Midweek Schedule Fetcher (ASL)</title>
   <style>
-    :root {
-      --bg: #ffffff; --card: #f7f7f8; --ink: #111; --muted: #666;
-      --accent: #4b5563; --shadow: 0 10px 30px rgba(0,0,0,0.06); --radius: 16px;
-    }
-    body { margin: 0; padding: 24px; font: 16px/1.4 system-ui, -apple-system, Segoe UI, Roboto, Helvetica, Arial; background: var(--bg); color: var(--ink); }
-    .container { max-width: 1100px; margin: 0 auto; }
-    header { display: flex; align-items: center; justify-content: space-between; margin-bottom: 18px; flex-wrap: wrap; gap: 8px; }
-    h1 { font-size: 20px; font-weight: 700; margin: 0; }
-    .row { display: grid; grid-template-columns: 1fr; gap: 16px; }
-    @media (min-width: 980px) { .row { grid-template-columns: 1fr 1fr; } }
-    .card { background: var(--card); border-radius: var(--radius); box-shadow: var(--shadow); padding: 16px; }
-    .controls { display: grid; gap: 12px; }
-    label { font-size: 13px; color: var(--muted); display: block; margin-bottom: 6px; }
-    input[type="url"], input[type="text"] { width: 100%; padding: 10px 12px; border-radius: 12px; border: 1px solid #ddd; }
-    .btns { display: flex; flex-wrap: wrap; gap: 8px; margin-top: 6px; }
-    button { border: 0; border-radius: 999px; padding: 10px 14px; cursor: pointer; font-weight: 600; box-shadow: var(--shadow); }
-    .primary { background: #4470AD; color: #fff; }
-    .ghost { background: #fff; color: var(--ink); border: 1px solid #ddd; }
-    .warn { background: #b7791f; color: #fff; }
-    .teal { background: #0f766e; color: #fff; }
-    .emerald { background: #059669; color: #fff; }
-    .status { font-size: 13px; color: #999; min-height: 1.2em; margin-left: 8px; }
-    .grid { display: grid; gap: 12px; grid-template-columns: repeat(auto-fill, minmax(260px, 1fr)); margin-top: 8px; }
-    .tile { background: #fff; border: 1px solid #e5e7eb; border-radius: 14px; padding: 12px; }
-    .tile h3 { font-size: 15px; margin: 0 0 6px; }
-    .mono { font-family: ui-monospace, Menlo, Consolas, monospace; font-size: 12px; white-space: pre-wrap; }
-    .strip { height: 6px; background: var(--accent); border-radius: 6px; margin-bottom: 8px; }
-    .section { border-left: 4px solid #e5e7eb; padding-left: 10px; margin: 8px 0; }
-    .section h4 { margin: 0 0 4px; font-size: 14px; }
-    .muted { color: var(--muted); }
-    .sec-min { font-size: 12px; color: var(--muted); margin-left: 6px; }
-    .pill { display: inline-flex; align-items: center; gap: 6px; background: #f3f4f6; color: #555; padding: 4px 12px; border-radius: 999px; font-size: 13px; font-weight: 500; }
-    .pill svg { width: 14px; height: 14px; }
-    .week-head { display:flex; align-items:center; justify-content:space-between; gap:8px; }
-    .iconbtn { display:inline-flex; align-items:center; justify-content:center; width:60px; height:60px; border-radius:999px; background:#fff; border:1px solid #e5e7eb; box-shadow: var(--shadow); cursor:pointer; }
-    .iconbtn svg { width:100%; height:100%; stroke:#374151; }
-    .iconbtn:active { transform: translateY(1px); }
-    .italic { font-style: italic; }
+    :root { --bg:#fff; --card:#f7f7f8; --ink:#111; --muted:#666; --accent:#4b5563; --shadow:0 10px 30px rgba(0,0,0,.06); --radius:16px; }
+    body { margin:0; padding:24px; font:16px/1.4 system-ui,-apple-system,Segoe UI,Roboto,Helvetica,Arial; background:var(--bg); color:var(--ink); }
+    .container { max-width:1100px; margin:0 auto; }
+    header { display:flex; align-items:center; justify-content:space-between; margin-bottom:18px; flex-wrap:wrap; gap:8px; }
+    h1 { font-size:20px; font-weight:700; margin:0; }
+    .row { display:grid; grid-template-columns:1fr; gap:16px; }
+    @media (min-width:980px){ .row { grid-template-columns:1fr 1fr; } }
+    .card { background:var(--card); border-radius:var(--radius); box-shadow:var(--shadow); padding:16px; }
+    .strip { height:6px; background:var(--accent); border-radius:6px; margin-bottom:8px; }
+    .controls { display:grid; gap:12px; }
+    label { font-size:13px; color:var(--muted); display:block; margin-bottom:6px; }
+    input[type="url"], input[type="text"] { width:100%; padding:10px 12px; border-radius:12px; border:1px solid #ddd; }
+    .btns { display:flex; flex-wrap:wrap; gap:8px; margin-top:6px; }
+    button { border:0; border-radius:999px; padding:10px 14px; cursor:pointer; font-weight:600; box-shadow:var(--shadow); }
+    .primary{ background:#4470AD; color:#fff; } .ghost{ background:#fff; color:var(--ink); border:1px solid #ddd; }
+    .warn{ background:#b7791f; color:#fff; } .teal{ background:#0f766e; color:#fff; } .emerald{ background:#059669; color:#fff; }
+    .status{ font-size:13px; color:#999; min-height:1.2em; margin-left:8px; }
+    .grid{ display:grid; gap:12px; grid-template-columns:repeat(auto-fill, minmax(260px, 1fr)); margin-top:8px; }
+    .tile{ background:#fff; border:1px solid #e5e7eb; border-radius:14px; padding:12px; }
+    .tile h3{ font-size:15px; margin:0 0 6px; }
+    .mono{ font-family:ui-monospace, Menlo, Consolas, monospace; font-size:12px; white-space:pre-wrap; }
+    .section{ border-left:4px solid #e5e7eb; padding-left:10px; margin:8px 0; }
+    .section h4{ margin:0 0 4px; font-size:14px; }
+    .muted{ color:var(--muted); } .sec-min{ font-size:12px; color:var(--muted); margin-left:6px; }
+    .pill{ display:inline-flex; align-items:center; gap:6px; background:#f3f4f6; color:#555; padding:4px 12px; border-radius:999px; font-size:13px; font-weight:500; }
+    .week-head{ display:flex; align-items:center; justify-content:space-between; gap:8px; }
+    .iconbtn{ display:inline-flex; align-items:center; justify-content:center; width:60px; height:60px; border-radius:999px; background:#fff; border:1px solid #e5e7eb; box-shadow:var(--shadow); cursor:pointer; }
+    .iconbtn:active{ transform:translateY(1px); }
+    .italic{ font-style:italic; }
   </style>
 </head>
 <body>
   <div class="container">
     <header>
       <h1>Midweek Schedule Fetcher (ASL)</h1>
-      <div class="pill">
-        <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"/>
-        </svg>
-        Version: 1.0 (2025-09-24)
-      </div>
+      <div class="pill">Version: 1.0 (2025-09-24)</div>
       <div class="btns"><button class="ghost" id="btnBack" style="display:none">Back</button></div>
     </header>
 
@@ -99,19 +85,201 @@
       <div class="strip"></div>
       <div class="week-head">
         <h3 id="weekTitle">Week</h3>
-        <button class="iconbtn" id="btnCopyPreview" title="Copy schedule" style="display:none">
-          <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 4h2a2 2 0 012 2v14a2 2 0 01-2 2H6a2 2 0 01-2-2V6a2 2 0 012-2h2m2-2h4a2 2 0 012 2v0a2 2 0 01-2 2h-4a2 2 0 01-2-2v0a2 2 0 012-2z"/>
-          </svg>
-        </button>
+        <button class="iconbtn" id="btnCopyPreview" title="Copy schedule" style="display:none">📋</button>
       </div>
       <div id="weekView"></div>
     </div>
   </div>
 
 <script>
-/* keep only one script block — duplicate removed */
-// ... (same JS you already had once, no duplicate second copy)
+/* ---------- Utilities ---------- */
+const $ = s => document.querySelector(s);
+const sleep = ms => new Promise(r => setTimeout(r, ms));
+function escapeHtml(s){ return String(s ?? "").replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c])); }
+
+/* ---------- Elements ---------- */
+const monthsGrid=$("#monthsGrid"), weeksGrid=$("#weeksGrid");
+const monthsStatus=$("#monthsStatus"), weeksStatus=$("#weeksStatus"), workerStatus=$("#workerStatus");
+const out=$("#out"), weekView=$("#weekView"), btnBack=$("#btnBack"), btnCopyPreview=$("#btnCopyPreview");
+
+/* ---------- State ---------- */
+let lastResult=null;
+let routePrefixCache = null; // "api" or "" once detected
+
+/* ---------- Fetch helper that tolerates /api/* vs bare routes ---------- */
+async function fetchWorkerJSON(base, path, queryParams) {
+  const b = base.replace(/\/+$/,"");
+  const qs = queryParams ? "?" + new URLSearchParams(queryParams).toString() : "";
+
+  // decide prefix once
+  if (routePrefixCache == null) {
+    // probe /api/health then /health then /
+    try { const r = await fetch(b + "/api/health"); if (r.ok) { routePrefixCache = "api"; } } catch{}
+    if (routePrefixCache == null) {
+      try { const r = await fetch(b + "/health"); if (r.ok) { routePrefixCache = ""; } } catch{}
+    }
+    if (routePrefixCache == null) {
+      try { const r = await fetch(b + "/"); if (r.ok) { routePrefixCache = ""; } } catch{}
+    }
+    // last resort default to "api"
+    if (routePrefixCache == null) routePrefixCache = "api";
+    console.log("Route prefix decided:", routePrefixCache);
+  }
+
+  const withPrefix = p => (routePrefixCache ? `/${routePrefixCache}${p}` : p);
+
+  // try primary style first, if 404 then try the other style once
+  let url = b + withPrefix(path) + qs;
+  let res = await fetch(url);
+  if (res.status === 404) {
+    // flip prefix once
+    const altPrefix = (routePrefixCache === "api") ? "" : "api";
+    const alt = b + (altPrefix ? `/${altPrefix}${path}` : path) + qs;
+    const res2 = await fetch(alt);
+    if (res2.ok) { routePrefixCache = altPrefix; res = res2; }
+  }
+  if (!res.ok) throw new Error(`${path} ${res.status}`);
+  return res.json();
+}
+
+/* ---------- Buttons ---------- */
+$("#btnClear").onclick=()=>{ out.textContent=""; weekView.innerHTML=""; weeksStatus.textContent=""; lastResult=null; btnCopyPreview.style.display="none"; };
+$("#btnCopyAll").onclick=async()=>{
+  if(!lastResult){ weeksStatus.textContent="Nothing to copy."; return; }
+  try{ await navigator.clipboard.writeText(JSON.stringify(lastResult, null, 2)); weeksStatus.textContent="Copied JSON."; }
+  catch{ weeksStatus.textContent="Copy failed."; }
+};
+btnCopyPreview.onclick=async()=>{
+  if(!lastResult){ weeksStatus.textContent="Nothing parsed yet."; return; }
+  const text = buildScheduleText(lastResult.weekTitle || $("#weekTitle")?.textContent || "Week", lastResult);
+  try{ await navigator.clipboard.writeText(text); weeksStatus.textContent="Copied schedule."; }
+  catch{ weeksStatus.textContent="Copy failed."; }
+};
+btnBack.onclick=()=>{ $("#detail").style.display="none"; $("#front").style.display=""; btnBack.style.display="none"; };
+
+/* Test */
+$("#btnTestWorker").onclick=async()=>{
+  const worker=$("#workerBase").value.trim(); if(!worker){ workerStatus.textContent="Enter Worker URL"; return; }
+  workerStatus.textContent="Pinging…";
+  try{
+    // use the same probe routine as fetch helper
+    routePrefixCache = null;
+    await fetchWorkerJSON(worker, "/health");
+    workerStatus.textContent="OK";
+  }catch(e){ console.error(e); workerStatus.textContent="Ping failed"; }
+};
+
+/* Load Months */
+$("#btnLoadMonths").onclick=async()=>{
+  const worker=$("#workerBase").value.trim(), main=$("#mainUrl").value.trim();
+  if(!worker||!main){ monthsStatus.textContent="Missing input"; return; }
+  monthsStatus.textContent="Loading months…"; monthsGrid.innerHTML=""; weeksGrid.innerHTML=""; weeksStatus.textContent="";
+  try{
+    const data = await fetchWorkerJSON(worker, "/listMonths", { u: main });
+    const items = (data.months||[]);
+    if(!items.length){ monthsStatus.textContent="No months found"; return; }
+    monthsStatus.textContent = items.length+" months found";
+    renderMonths(items);
+  }catch(e){ console.error(e); monthsStatus.textContent="Load failed"; }
+};
+
+function renderMonths(items){
+  monthsGrid.innerHTML="";
+  for(const it of items){
+    const tile=document.createElement("div");
+    tile.className="tile";
+    tile.innerHTML=`<h3>${escapeHtml(it.title)}</h3><div class="btns"><button class="teal">Open</button></div>`;
+    tile.querySelector("button").onclick=()=>loadWeeks(it.url, it.title);
+    monthsGrid.appendChild(tile);
+  }
+}
+
+/* Weeks */
+async function loadWeeks(monthUrl){
+  const worker=$("#workerBase").value.trim();
+  weeksStatus.textContent=`Loading weeks…`; weeksGrid.innerHTML="";
+  try{
+    const data = await fetchWorkerJSON(worker, "/listWeeks", { u: monthUrl });
+    const items = data.weeks || [];
+    if(!items.length){ weeksStatus.textContent="No weeks found"; return; }
+    weeksStatus.textContent = items.length+" weeks found";
+    renderWeeks(items);
+  }catch(e){ console.error(e); weeksStatus.textContent="Load failed"; }
+}
+function renderWeeks(items){
+  weeksGrid.innerHTML="";
+  for(const it of items){
+    const tile=document.createElement("div");
+    tile.className="tile";
+    tile.innerHTML=`<h3>${escapeHtml(it.title)}</h3><div class="btns"><button class="emerald">Parse</button></div>`;
+    tile.querySelector("button").onclick=()=>parseWeek(it.url, it.title);
+    weeksGrid.appendChild(tile);
+  }
+}
+
+/* Parse Week */
+async function parseWeek(weekUrl, weekLabel){
+  const worker=$("#workerBase").value.trim();
+  weeksStatus.textContent="Loading week…";
+  out.textContent=""; weekView.innerHTML=""; lastResult=null;
+  const wt=document.querySelector('#weekTitle'); if(wt) wt.textContent = weekLabel || 'Week';
+  try{
+    const data = await fetchWorkerJSON(worker, "/parseWeek", { u: weekUrl }); // { ok, weekTitle, song, sections }
+    if(!data.ok){ throw new Error("parseWeek body not ok"); }
+    const result = { source: weekUrl, song: data.song, sections: data.sections, weekTitle: data.weekTitle };
+    lastResult = result;
+    out.textContent = JSON.stringify(result, null, 2);
+    render(result);
+    btnCopyPreview.style.display="";
+  }catch(e){ console.error(e); weeksStatus.textContent="Parse failed"; }
+}
+
+/* Render */
+function render(res){
+  const { song: songs, sections } = res;
+  weekView.innerHTML = `<div class="grid" style="grid-template-columns: 1fr;">
+    <div class="tile"><h3>SONG</h3>
+      <div class="section"><h4>Opening</h4><div class="muted">${songs?.opening ?? "—"}</div></div>
+      <div class="section"><h4>Middle</h4><div class="muted">${songs?.middle ?? "—"}</div></div>
+      <div class="section"><h4>Closing</h4><div class="muted">${songs?.closing ?? "—"}</div></div>
+    </div>
+    ${(sections||[]).map(sec => `
+      <div class="tile">
+        <h3>${escapeHtml(sec.section)}${sec.minutes!=null?` <span class="sec-min">(${sec.minutes} min.)</span>`:""}</h3>
+        ${(sec.items||[]).map(it => `
+          <div class="section">
+            <h4>${it.num}. ${escapeHtml(it.title || "")}</h4>
+            ${it.sublabel ? `<div class="muted italic">${escapeHtml(it.sublabel)}</div>` : ``}
+            <div class="muted">${it.minutes!=null?`(${it.minutes} min.)`:`(min. not listed)`}</div>
+          </div>
+        `).join("")}
+      </div>
+    `).join("")}
+  </div>`;
+}
+
+/* Clipboard schedule text */
+function buildScheduleText(weekTitle, res){
+  const lines = [];
+  lines.push(weekTitle || res.weekTitle || "Week", "");
+  if(res.song){
+    lines.push("SONG");
+    lines.push(`Opening: ${res.song.opening ?? "—"}`);
+    lines.push(`Middle: ${res.song.middle ?? "—"}`);
+    lines.push(`Closing: ${res.song.closing ?? "—"}`, "");
+  }
+  for(const sec of res.sections||[]){
+    const head = sec.minutes!=null ? `${sec.section} (${sec.minutes} min.)` : sec.section;
+    lines.push(head);
+    for(const it of sec.items||[]){
+      const sbl = it.sublabel ? ` — ${it.sublabel}` : "";
+      const mins = it.minutes!=null ? ` (${it.minutes} min.)` : " (min. not listed)";
+      lines.push(`${it.num}. ${it.title}${sbl}${mins}`);
+    }
+    lines.push("");
+  }
+  return lines.join("\n").replace(/\n{3,}/g,"\n\n").trim();
+}
 </script>
 </body>
 </html>
